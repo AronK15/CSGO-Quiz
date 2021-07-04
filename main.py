@@ -94,7 +94,6 @@ class QuizStarter:
   def __init__(self, parent):
       background_color="dodgerblue"
 
-      self.bg_image = Image
       #frame set up
       self.quiz_frame = Frame(parent, bg = background_color, padx = 100, pady = 100)
       self.quiz_frame.grid()
@@ -121,6 +120,7 @@ class QuizStarter:
       print(names_list)
       self.quiz_frame.destroy()
       Quiz(root)
+      
       
 class Quiz: 
 
@@ -175,67 +175,88 @@ class Quiz:
 
 
     def test_progress(self):
-       global score
-       scr_label = self.score_label
-       choice = self.var1.get()
-       if len(asked)>9:#if the question is last
-          if choice == questions_answers[qnum][6]:#if last question is right answer
+        global score
+        scr_label = self.score_label
+        choice = self.var1.get()
+        if len(asked)>9:#if it is the last question
+            if choice==questions_answers[qnum][6]:#if last question is right answer
               score +=1
-              scr_label.configure(text = score)
-              self.confirm_button.config(text = "confirm")
-          else:#if the last question is wrong answer
-              score +=0
-              scr_label.configure(text = "The correct answer was " + questions_answers[qnum][5])
-              self.confirm_button.config(text= "Confrim")
-       else: 
-          if choice == 0: #check if the user has made a choice
-              self.confirm_button.configure(text = "Try again please, you didnt select anything")
-              choice = self.var1.get()
-          else:# if they made a choice and its not last question
-             if choice == questions_answers[qnum][6]:#if their choice is right
-                 score +=1
-                 scr_label.configure(text = score)
-                 self.confirm_button.configure(text = "Confirm")
-                 self.questions_setup()#run this method to move to next question 
-             else: #if the choice is wrong
-              score +=0
-              scr_label.configure(text = "The correct answer was: " + questions_answers[qnum][5])
-              self.confirm_button.configure(text = "Confirm")
-              self.questions_setup()
+              scr_label.configure(text=score)
+              self.confirm_button.config(text="confirm")
+              self.end_frame()
+            else: #is last question is wrong answer
+                score+=0
+                scr_label.config(text="The correct answer was " + questions_answers[qnum][5])
+                self.confirm_button.config(text="Confirm")
+                self.end_frame()
+        else:#If its not last question
+            if choice==0:#check if user has made a choice
+                self.confirm_button.configure(text="Try Again Please, You Didn't Select Anything ")
+                choice==self.var1.get()
+            else:#If they made a choice and its not last question
+              if choice==questions_answers[qnum][6]:#If their choice is right
+                score +=1
+                scr_label.configure(text=score)
+                self.confirm_button.config(text="Confirm")
+                self.questions_setup()#run this method to move to next question
+              else:
+                score +=0
+                scr_label.configure(text="The Correct Answer Was: " + questions_answers[qnum][5])
+                self.confirm_button.configure(text="Confirm")
+                self.questions_setup()
 
-def end_screen(self):
-    root.withdraw()
-    open_endscrn=End()
+    def end_frame(self):
+      root.withdraw()
+      name=names_list[0]
+      file=open("LeaderBoard.txt","a")
+      file.write(str(score))
+      file.write(" - ")
+      file.write(name+"\n")
+      file.close()
 
-    class End:
+      inputFile = open("LeaderBoard.txt", "r")
+      lineList = inputFile.readlines()
+      lineList.sort()
+      top=[]
+      print(top)
+      top5=(lineList[-5:])
+      for line in top5:
+          point=line.split(" - ")
+          top.append((int(point[0]), point[1]))
+      file.close()
+      top.sort()
+      top.reverse()
+      return_string=""
+      for i in range(len(top)):
+            return_string +="{} - {}\n".format(top[i][0], top[i][1])
+      print(return_string)
+
+      open_endscrn=End()
+      open_endscrn.listLabel.config(text=return_string)
+
+class End:
       def __init__(self):
-         background="OldLace"
-         self.end_box= Toplevel(root)
-         self.end_box.title("End Box")
+          background="dodgerblue"
+          self.end_box= Toplevel(root)
+          self.end_box.title("End Box")
 
-         self.end_frame = Frame (self.end_box, width=1000, height=1000, bg=background)
-         self.end_frame.grid()
+          self.end_frame = Frame (self.end_box, width=1000, height=1000, bg=background)
+          self.end_frame.grid()
 
-         end_heading = Label (self.end_frame, text='Well Done', font=('Tw Cen MT', 22, 'bold'), bg=background, pady=15)
-         end_heading.grid(row=0)
+          end_heading = Label (self.end_frame, text='Thank you for completing the quiz!', font=('Tw Cen MT', 22, 'bold'), bg=background, pady=15)
+          end_heading.grid(row=1)
 
-         exit_button = Button (self.end_frame, text='Exit', width=10, bg="IndianaRed1",font=('Tw Cen MT', 12, 'bold'),command=self.close_end)
-         exit_button.grid(row=4, pady=20)
+          exit_button = Button (self.end_frame, text='Exit', width=10, bg="cyan",font=('Tw Cen MT', 12, 'bold'),command=self.close_end)
+          exit_button.grid(row=4, pady=20)
+          self.listLabel = Label (self.end_frame, text="1st Place Available", font=('TW Cen MT',18), width=40, bg=background, padx=10, pady=10)  
+          self.listLabel.grid(column=0, row=2)
 
-         self.listLabel = Label (self.end_frame, text="1st Place Available", font=('TW Cen MT',18), width=40, bg=background, padx=10, pady=10)  
-         self.listLabel.grid(column=0, row=2)
+          self.quit= Button(self.end_frame, text="Quit", font=("Helvetica", "13", "bold",))
 
-def close_end(self):
-   self.end_box.destroy()
-   root.withdraw()       
+      def close_end(self):
+            self.end_box.destroy()
+            root.destroy()       
  
-#quit button
-   self.quit = Button(self.quiz_frame, text="Quit", font=("Helvetica", "13", "bold"), bg="red2", command=self.endScreen)
-   self.quit.grid(row=7, column=3, sticky=E, padx=5, pady=5)
-
-
-
-
 
 
 #***************Starting point of program******************#
